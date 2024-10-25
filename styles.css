@@ -1,0 +1,71 @@
+#instructions {
+    visibility: visible;
+}
+
+#dinosaurGame {
+    position: center;
+    margin: auto;
+    margin-top: 80px;
+    width: 880px;
+    height: 190px;
+    overflow: hidden;
+    background-size: cover;
+    background-position: center;
+    border-top: solid #C4E1F6;
+    border-bottom: solid #FF9D3D;
+    border-left: solid #FFBD73;
+    border-right: solid #FFBD73;
+
+}
+
+#dinosaur {
+    height: 70px;
+    width: 50px;
+    position: relative;
+    top: 120px;
+    left: 70px;
+    background-color: #6bdc63;
+
+}
+
+.obstaclesDown {
+    width: 40px;
+    height: 50px;
+    background-color: rgb(43, 174, 181);
+    top: 70px;
+    left: 220px;
+    float: right;
+    position: relative;
+
+}
+
+.obstaclesUp {
+    width: 40px;
+    height: 50px;
+    background-color: rgb(43, 174, 181);
+    position: relative;
+    top: -70px;
+    left: 300px;
+    float: right;
+    position: relative;
+
+}
+
+#score {
+    font-family: "Times New Roman";
+    float: right;
+    position: relative;
+    top: -70px;
+    left: -20px;
+    z-index: 10;
+}
+
+#levelUp {
+    visibility: hidden;
+    font-family: "Times New Roman";
+    float: left;
+    position: relative;
+    top: -70px;
+    left: 10px;
+    z-index: 10;
+}
