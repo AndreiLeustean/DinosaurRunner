@@ -5,12 +5,16 @@ const obstaclesDown = document.getElementsByClassName("obstaclesDown");
 const obstaclesUp = document.getElementsByClassName("obstaclesUp");
 const VERIFICATION_INTERVAL = 10;
 const GAME_HEIGHT = 120;
+const TEN_SECONDS = 100;
+const TWELVE_SECONDS = 120;
 const UPWARD = 0.1;
 const DOWNWARD = 0;
 const MILLISECOND_INTERVAL = 100;
 const OBSTACLE_START_POSITION = 350;
 const MINIMUM_OBSTACLE_SPACING = 12;
 const OBSTACLE_UPDATE_INTERVAL = 10;
+const LIFT_SPEED = 1.5;
+const DOWN_SPEED = 2;
 let gameActive = false;
 let restartGame = false;
 let dinosaurIsJumping = false;
@@ -29,7 +33,6 @@ function updateScore() {
             let lengthOfScore = (score + "").length;
             let newTextScore = currentScoreText.slice(0, -lengthOfScore);
             document.getElementById("score").innerHTML = newTextScore + score;
-            spawnObstacle();
             checkLevelUp();
         }
     }, MILLISECOND_INTERVAL);
@@ -48,12 +51,12 @@ function checkAndUpdateHighestScore() {
 }
 
 function checkLevelUp() {
-    if (score % 100 === 0 && score > 99) {
+    if (score % TEN_SECONDS === 0 && score > 99) {
         document.getElementById('levelUp').style.visibility = 'visible';
         timeBetweenObstacles = Math.max(timeBetweenObstacles - 1, MINIMUM_OBSTACLE_SPACING);
         ++level;
         return true;
-    } else if (score % 120 === 0) {
+    } else if (score % TWELVE_SECONDS === 0) {
         document.getElementById('levelUp').style.visibility = 'hidden';
         return false;
     }
@@ -63,18 +66,18 @@ function jumpDinosaur() {
     let heightOfTheJump = parseInt(window.getComputedStyle(DINOSAUR).top);
     let jumpHeight = GAME_HEIGHT;
     let jumpDirection = UPWARD;
-    let jumpSpeed = 1.5;
+    let jumpSpeed = LIFT_SPEED;
 
     jumpInterval = setInterval(function () {
         dinosaurIsJumping = true;
-        if (jumpHeight === 0) {
+        if (jumpHeight === DOWNWARD) {
             jumpDirection = DOWNWARD;
         }
         if (jumpDirection === UPWARD) {
             jumpHeight -= jumpSpeed;
             DINOSAUR.style.top = jumpHeight + 'px';
         } else {
-            jumpSpeed = 2;
+            jumpSpeed = DOWN_SPEED;
             jumpHeight += jumpSpeed;
             DINOSAUR.style.top = jumpHeight + 'px';
             if (jumpHeight === GAME_HEIGHT) {
@@ -85,20 +88,32 @@ function jumpDinosaur() {
     }, VERIFICATION_INTERVAL);
 }
 
-function spawnObstacle() {
-    if (level >= 2) {
-        if (score % timeBetweenObstacles === 0) {
+let lastSpawnTime = 0;
+
+function spawnObstacle(timestamp) {
+    if (!gameActive) return;
+    if (!lastSpawnTime) {
+        lastSpawnTime = timestamp;
+    }
+    const timeSinceLastSpawn = timestamp - lastSpawnTime;
+
+    if (timeSinceLastSpawn >= timeBetweenObstacles * 100) {
+        if (level >= 2) {
             let obstacle = getRandomInt(2);
             if (obstacle === 1) {
                 createObstaclesUp();
             } else {
                 createObstaclesDown();
             }
+        } else {
+            createObstaclesDown();
         }
-    } else if (score % timeBetweenObstacles === 0 || score === 1) {
-        createObstaclesDown();
+        lastSpawnTime = timestamp;
     }
+    requestAnimationFrame(spawnObstacle);
 }
+
+
 
 function updateObstaclePosition() {
     obstacleUpdateInterval = setInterval(function () {
@@ -107,18 +122,19 @@ function updateObstaclePosition() {
     }, OBSTACLE_UPDATE_INTERVAL);
 }
 
-function createObstaclesDown() {
+function createObstacle(type) {
     const obstacle = document.createElement('div');
-    obstacle.classList.add('obstaclesDown');
+    obstacle.classList.add(type);
     obstacle.style.left = OBSTACLE_START_POSITION + 'px';
     document.getElementById('dinosaurGame').appendChild(obstacle);
 }
 
+function createObstaclesDown() {
+    createObstacle('obstaclesDown');
+}
+
 function createObstaclesUp() {
-    const obstacle = document.createElement('div');
-    obstacle.classList.add('obstaclesUp');
-    obstacle.style.left = OBSTACLE_START_POSITION + 'px';
-    document.getElementById('dinosaurGame').appendChild(obstacle);
+    createObstacle('obstaclesUp');
 }
 
 function changeObstaclePosition() {
@@ -128,11 +144,14 @@ function changeObstaclePosition() {
 
 function changeObstaclePositionForClass(obstacleClass) {
     const obstacles = document.getElementsByClassName(obstacleClass);
-    for (let i = 0; i < obstacles.length; ++i) {
-        if (i > 0) {
-            let left = parseInt(window.getComputedStyle(obstacles[i]).left);
+    for (let i = 1; i < obstacles.length; ++i) {
+        let left = parseInt(window.getComputedStyle(obstacles[i]).left);
+        if (left <= -800) {
+            obstacles[i].remove();
+        } else {
             obstacles[i].style.left = (left - movementSpeed) + 'px';
         }
+
     }
 }
 
@@ -191,13 +210,15 @@ document.addEventListener('keydown', function (event) {
     if (event.key === " " && restartGame) {
         startNewGame();
         restartGame = false;
+        requestAnimationFrame(spawnObstacle);
     } else if (event.key === " ") {
         if (!dinosaurIsJumping) {
             jumpDinosaur();
         }
         if (!gameActive) {
             updateScore();
+            gameActive = true;
+            requestAnimationFrame(spawnObstacle);
         }
-        gameActive = true;
     }
 });
