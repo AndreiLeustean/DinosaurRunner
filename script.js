@@ -59,7 +59,8 @@ function checkLevelUp() {
         timeBetweenObstacles = Math.max(timeBetweenObstacles - 1, MINIMUM_OBSTACLE_SPACING);
         ++level;
         return true;
-    } else if (score % TWELVE_SECONDS === 0) {
+    }
+    if (score % TWELVE_SECONDS === 0) {
         document.getElementById('levelUp').style.visibility = 'hidden';
         return false;
     }
@@ -99,13 +100,11 @@ function spawnObstacle(timestamp) {
     const timeSinceLastSpawn = timestamp - lastSpawnTime;
 
     if (timeSinceLastSpawn >= timeBetweenObstacles * 100) {
-        if (level >= 2) {
-            let obstacle = getRandomInt(2);
-            if (obstacle === 1) {
-                createObstacle('obstaclesUp');
-            } else {
-                createObstacle('obstaclesDown');
-            }
+        let obstacle = getRandomInt(2);
+        if (level >= 2 && obstacle === 1) {
+            createObstacle('obstaclesUp');
+        } else if (level >= 2) {
+            createObstacle('obstaclesDown');
         } else {
             createObstacle('obstaclesDown');
         }
@@ -113,8 +112,6 @@ function spawnObstacle(timestamp) {
     }
     requestAnimationFrame(spawnObstacle);
 }
-
-
 
 function updateObstaclePosition() {
     obstacleUpdateInterval = setInterval(function () {
