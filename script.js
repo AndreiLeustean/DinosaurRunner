@@ -103,8 +103,6 @@ function spawnObstacle(timestamp) {
         let obstacle = getRandomInt(2);
         if (level >= 2 && obstacle === 1) {
             createObstacle('obstaclesUp');
-        } else if (level >= 2) {
-            createObstacle('obstaclesDown');
         } else {
             createObstacle('obstaclesDown');
         }
